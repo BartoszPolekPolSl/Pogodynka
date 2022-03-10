@@ -1,13 +1,11 @@
 package com.example.pogodynka.fragments
 
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.pogodynka.databinding.MainFragmentBinding
 import com.google.android.gms.common.api.Status
@@ -31,8 +29,8 @@ class MainFragment : Fragment() {
         _binding = MainFragmentBinding.inflate(inflater, container, false)
         requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
             .apply {
-                val apiKey = metaData.getString("com.google.android.geo.API_KEY")
-                Places.initialize(requireContext(), apiKey!!)
+                val mapsApiKey = metaData.getString("com.google.android.geo.API_KEY")
+                Places.initialize(requireContext(), mapsApiKey!!)
             }
         return binding.root
     }
