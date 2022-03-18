@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import com.example.pogodynka.data.viewmodels.MainFragmentViewModel
 import com.example.pogodynka.databinding.MainFragmentBinding
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
@@ -17,6 +19,8 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 
 
 class MainFragment : Fragment() {
+
+    private val viewModel : MainFragmentViewModel by viewModels()
 
     private var _binding: MainFragmentBinding? = null
     private val binding get() = _binding!!
@@ -38,12 +42,17 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val autocompleteFragment = binding.autocompleteFragment.getFragment<AutocompleteSupportFragment>()
-        autocompleteFragment.setTypeFilter(TypeFilter.GEOCODE)
-        autocompleteFragment.setPlaceFields(listOf(  Place.Field.LAT_LNG))
+        autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ADDRESS, Place.Field.LAT_LNG))
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 // TODO: Get info about the selected place.
-                Log.i("LOL", "Place: ${place.latLng}")
+                Log.i("LOL", "Place: ${place.latLng},${place.address}")
+                viewModel.getWeather()
+                viewModel.weatherResponse.observe(viewLifecycleOwner,{
+                    Log.i("LOL", "An error occurred: ${it.body().toString()}")
+                })
+
             }
 
             override fun onError(status: Status) {
