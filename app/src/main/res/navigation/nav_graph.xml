@@ -7,5 +7,20 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.pogodynka.fragments.MainFragment"
-        android:label="MainFragment" />
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_weatherFragment"
+            app:destination="@id/weatherFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/weatherFragment"
+        android:name="com.example.pogodynka.fragments.WeatherFragment"
+        android:label="WeatherFragment" >
+        <argument
+            android:name="lat"
+            app:argType="java.lang.Double" />
+        <argument
+            android:name="lon"
+            app:argType="java.lang.Double" />
+    </fragment>
 </navigation>

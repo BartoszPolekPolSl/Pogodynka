@@ -1,15 +1,14 @@
 package com.example.pogodynka.data.model
 
+import com.example.pogodynka.R
+import java.util.*
+
 data class WeatherApiResponse(
-    val base: String,
-    val coord: Coord,
     val main: Main,
-    val weather: List<Weather>
+    val sys: Sys,
+    val timezone: Int,
+    val weather: List<Weather>,
 ) {
-    data class Coord(
-        val lat: Double,
-        val lon: Double
-    )
 
     data class Main(
         val feels_like: Double,
@@ -20,10 +19,15 @@ data class WeatherApiResponse(
         val temp_min: Double
     )
 
+    data class Sys(
+        val sunrise: Int,
+        val sunset: Int,
+    )
+
     data class Weather(
         val description: String,
         val icon: String,
-        val id: Int,
         val main: String
     )
+
 }

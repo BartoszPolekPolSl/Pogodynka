@@ -18,20 +18,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Gliwice, Polska" />
-    <TextView
-        android:id="@+id/txt_view_time"
+    <TextClock
+        android:id="@+id/text_clock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:textColor="@color/gray"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/txt_view_location"
-        tools:text="Poniedziałek, 11:00" />
+        />
 
     <ImageButton
+        android:id="@+id/button_fav"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="@drawable/ic_baseline_star_24"
+        android:background="@drawable/ic_baseline_star_outline_24"
         android:backgroundTint="@color/quantum_yellowA700"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/txt_view_location" />
@@ -42,7 +43,7 @@
         android:layout_marginBottom="15dp"
         android:textColor="@color/temp"
         android:textSize="64sp"
-        app:layout_constraintBottom_toBottomOf="@id/image_view_weather"
+        app:layout_constraintBottom_toBottomOf="@id/image_view_weather_icon"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="27" />
     <TextView
@@ -52,17 +53,18 @@
         android:layout_marginLeft="5dp"
         app:layout_constraintStart_toEndOf="@id/txt_view_temp"
         app:layout_constraintTop_toTopOf="@id/txt_view_temp"
-        tools:text="\u2103"
+        android:text="\u2103"
         android:textSize="54sp"
         android:layout_gravity="center"/>
+
     <ImageView
-        android:id="@+id/image_view_weather"
+        android:id="@+id/image_view_weather_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="50dp"
-        android:src="@drawable/clear_d"
+        android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txt_view_time" />
+        app:layout_constraintTop_toBottomOf="@id/text_clock"
+        tools:src="@drawable/clear_d" />
     <TextView
         android:id="@+id/txt_view_description"
         android:layout_width="wrap_content"
@@ -80,7 +82,7 @@
         android:layout_marginTop="50dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_view_description"
-        tools:text="Pressure" />
+        android:text="@string/pressure" />
 
     <TextView
         android:id="@+id/txt_view_pressure_value"
@@ -104,7 +106,7 @@
         style="@style/TextViewWeatherConditions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/devider1"
-        tools:text="Humidity" />
+        android:text="@string/humidity" />
 
     <TextView
         android:id="@+id/txt_view_humidity_value"
@@ -128,7 +130,7 @@
         android:textColor="@color/quantum_black_100"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/devider2"
-        tools:text="Sunrise" />
+        android:text="@string/sunrise" />
 
     <TextView
         android:id="@+id/txt_view_sunrise_value"
@@ -151,7 +153,7 @@
         style="@style/TextViewWeatherConditions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/devider3"
-        tools:text="Sunset" />
+        android:text="@string/sunset" />
 
     <TextView
         android:id="@+id/txt_view_sunset_value"
