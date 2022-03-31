@@ -2,36 +2,42 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:clickable="true">
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:cardCornerRadius="15dp"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        app:cardCornerRadius="15dp"
         app:cardElevation="7dp"
-        android:clickable="true">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="10dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginLeft="25dp">
+            android:layout_marginLeft="25dp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/txt_view_location"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="5dp"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="21sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Gliwice, Polska" />
 
-            <TextView
+            <TextClock
                 android:id="@+id/text_clock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -42,6 +48,7 @@
                 tools:text="Poniedziałek, 11:00" />
 
             <ImageButton
+                android:id="@+id/button_fav"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="20dp"
@@ -60,16 +67,17 @@
                 app:layout_constraintBottom_toBottomOf="@id/image_view_weather"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="27" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/temp"
-                    android:layout_marginLeft="5dp"
-                    app:layout_constraintStart_toEndOf="@id/txt_view_temp"
-                    app:layout_constraintTop_toTopOf="@id/txt_view_temp"
-                    tools:text="\u2103"
-                    android:textSize="50sp"
-                    android:layout_gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:text="\u2103"
+                android:textColor="@color/temp"
+                android:textSize="50sp"
+                app:layout_constraintStart_toEndOf="@id/txt_view_temp"
+                app:layout_constraintTop_toTopOf="@id/txt_view_temp" />
 
             <ImageView
                 android:id="@+id/image_view_weather"
@@ -81,13 +89,15 @@
                 app:layout_constraintTop_toBottomOf="@id/text_clock" />
 
             <TextView
+                android:id="@+id/txt_view_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txt_view_temp"
-                android:textSize="20sp"
-                tools:text="Clear sky"/>
-
+                tools:text="Clear sky" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

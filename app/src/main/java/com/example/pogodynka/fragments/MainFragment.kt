@@ -12,13 +12,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.pogodynka.PogodynkaApplication
+import com.example.pogodynka.adapters.FavoriteWeatherListAdapter
+import com.example.pogodynka.data.model.WeatherApiResponse
+import com.example.pogodynka.data.viewmodels.WeatherViewModel
+import com.example.pogodynka.data.viewmodels.WeatherViewModelFactory
 import com.example.pogodynka.databinding.MainFragmentBinding
 import com.example.pogodynka.other.Constants
 import com.example.pogodynka.other.Permissions
+import com.example.pogodynka.other.WeatherApiResponseHelper
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.location.LocationRequest.PRIORITY_LOW_POWER
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -34,8 +43,11 @@ import java.util.*
 
 class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
-
-
+    private val viewModel: WeatherViewModel by activityViewModels {
+        WeatherViewModelFactory(
+            (activity?.application as PogodynkaApplication).database.pogodynkaDao()
+        )
+    }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var _binding: MainFragmentBinding? = null
@@ -65,9 +77,14 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         binding.fabGpsLocation.setOnClickListener {
             getGPSWeather()
         }
+        val adapter = FavoriteWeatherListAdapter(viewModel.favoriteWeatherList, {navigateToWeatherFragment(it.coord.lat, it.coord.lon)},{viewModel.removeFavoriteWeather(it)})
+        binding.recyclerviewFavorite.layoutManager = LinearLayoutManager(this.context)
+        binding.recyclerviewFavorite.adapter = adapter
+        viewModel.favoriteWeatherList.observe(viewLifecycleOwner,
+            { adapter.notifyDataSetChanged() })
     }
 
-    private fun setAutocompleteFragment(){
+    private fun setAutocompleteFragment() {
         val autocompleteFragment =
             binding.autocompleteFragment.getFragment<AutocompleteSupportFragment>()
         autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
@@ -76,9 +93,7 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         )
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                Log.i("LOL", " ${place.latLng.longitude},${place.latLng.latitude}")
-                findNavController()
-                    .navigate(MainFragmentDirections.actionMainFragmentToWeatherFragment(place.latLng.latitude, place.latLng.longitude))
+                navigateToWeatherFragment(place.latLng.latitude, place.latLng.longitude)
             }
 
             override fun onError(status: Status) {
@@ -88,36 +103,71 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         })
     }
 
+    private fun navigateToWeatherFragment(lat : Double, lon : Double) {
+        val locationName = WeatherApiResponseHelper.getLocationName(
+            lat,
+            lon,
+            requireContext()
+        )
+        findNavController()
+            .navigate(
+                MainFragmentDirections.actionMainFragmentToWeatherFragment(
+                    lat,
+                    lon,
+                    locationName
+                )
+            )
+    }
+
     @SuppressLint("MissingPermission")
-    private fun getGPSWeather(){
-        if(Permissions.hasLocationPermissions(requireContext())){
-            if(isLocationEnabled()){
-                fusedLocationClient.getCurrentLocation(PRIORITY_LOW_POWER, CancellationTokenSource().token).addOnSuccessListener { location ->
+    private fun getGPSWeather() {
+        if (Permissions.hasLocationPermissions(requireContext())) {
+            if (isLocationEnabled()) {
+                //TODO check interent
+                fusedLocationClient.getCurrentLocation(
+                    PRIORITY_HIGH_ACCURACY,
+                    CancellationTokenSource().token
+                ).addOnSuccessListener { location ->
 
                     Log.i("LOL", " ${location.latitude},${location.longitude}")
+                    val locationName = WeatherApiResponseHelper.getLocationName(
+                        location.latitude,
+                        location.longitude,
+                        requireContext()
+                    )
                     findNavController()
-                        .navigate(MainFragmentDirections.actionMainFragmentToWeatherFragment(location.latitude, location.longitude))
+                        .navigate(
+                            MainFragmentDirections.actionMainFragmentToWeatherFragment(
+                                location.latitude,
+                                location.longitude,
+                                locationName
+                            )
+                        )
                 }
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Location cannot be obtained. Check that you have access to the Internet and that the location is turned on.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-            else{
-                Toast.makeText(requireContext(),"Location cannot be obtained. Check that you have access to the Internet and that the location is turned on.", Toast.LENGTH_LONG).show()
-            }
-        }
-        else {
+        } else {
             requestPermissions()
         }
     }
 
     private fun isLocationEnabled(): Boolean {
-        val locationManager : LocationManager = requireContext().getSystemService(LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)&&locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        val locationManager: LocationManager =
+            requireContext().getSystemService(LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        )
     }
 
-    private fun requestPermissions(){
-        if(Permissions.hasLocationPermissions(requireContext())){
+    private fun requestPermissions() {
+        if (Permissions.hasLocationPermissions(requireContext())) {
             return
-        }
-        else{
+        } else {
             EasyPermissions.requestPermissions(
                 this,
                 "You need to accept location permissions to use this feature",
@@ -134,9 +184,9 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-       if(!Permissions.hasLocationPermissions(requireContext())) {
-           AppSettingsDialog.Builder(this).build().show()
-       }
+        if (!Permissions.hasLocationPermissions(requireContext())) {
+            AppSettingsDialog.Builder(this).build().show()
+        }
     }
 
     override fun onRequestPermissionsResult(

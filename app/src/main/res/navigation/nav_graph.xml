@@ -22,5 +22,8 @@
         <argument
             android:name="lon"
             app:argType="java.lang.Double" />
+        <argument
+            android:name="locName"
+            app:argType="string" />
     </fragment>
 </navigation>

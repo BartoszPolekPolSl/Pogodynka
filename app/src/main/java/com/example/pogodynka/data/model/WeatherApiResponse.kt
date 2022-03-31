@@ -1,14 +1,27 @@
 package com.example.pogodynka.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.example.pogodynka.R
 import java.util.*
 
 data class WeatherApiResponse(
     val main: Main,
     val sys: Sys,
+    var coord: Coord,
+    var name: String,
     val timezone: Int,
+    var favorite : Boolean = false,
     val weather: List<Weather>,
 ) {
+
+    @Entity(tableName = "favorite_coord")
+    data class Coord(
+        val lat: Double,
+        val lon: Double,
+        @PrimaryKey()
+        var name : String = ""
+    )
 
     data class Main(
         val feels_like: Double,
