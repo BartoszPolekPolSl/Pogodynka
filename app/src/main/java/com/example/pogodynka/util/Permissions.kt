@@ -1,4 +1,4 @@
-package com.example.pogodynka.other
+package com.example.pogodynka.util
 
 import android.Manifest
 import android.content.Context

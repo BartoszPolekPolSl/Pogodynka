@@ -11,24 +11,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.ViewUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.pogodynka.PogodynkaApplication
 import com.example.pogodynka.adapters.FavoriteWeatherListAdapter
 import com.example.pogodynka.data.model.WeatherApiResponse
 import com.example.pogodynka.data.viewmodels.WeatherViewModel
 import com.example.pogodynka.data.viewmodels.WeatherViewModelFactory
 import com.example.pogodynka.databinding.MainFragmentBinding
 import com.example.pogodynka.other.Constants
-import com.example.pogodynka.other.Permissions
-import com.example.pogodynka.other.WeatherApiResponseHelper
+import com.example.pogodynka.util.Permissions
+import com.example.pogodynka.util.WeatherApiResponseHelper
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-import com.google.android.gms.location.LocationRequest.PRIORITY_LOW_POWER
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.Places
@@ -36,18 +36,24 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.x.closestKodein
+import org.kodein.di.generic.instance
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
+import com.example.pogodynka.util.toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import retrofit2.Response
 
 
-class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
+class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAware {
 
-    private val viewModel: WeatherViewModel by activityViewModels {
-        WeatherViewModelFactory(
-            (activity?.application as PogodynkaApplication).database.pogodynkaDao()
-        )
-    }
+    override val kodein by closestKodein()
+    private val factory: WeatherViewModelFactory by instance()
+    private val viewModel: WeatherViewModel by activityViewModels { factory }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var _binding: MainFragmentBinding? = null
@@ -77,12 +83,25 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         binding.fabGpsLocation.setOnClickListener {
             getGPSWeather()
         }
-        val adapter = FavoriteWeatherListAdapter(viewModel.favoriteWeatherList, {navigateToWeatherFragment(it.coord.lat, it.coord.lon)},{viewModel.removeFavoriteWeather(it)})
+        val adapter = FavoriteWeatherListAdapter(
+            viewModel.favoriteWeatherList,
+            { navigateToWeatherFragment(it) },
+            { viewModel.removeFavoriteWeather(it) })
         binding.recyclerviewFavorite.layoutManager = LinearLayoutManager(this.context)
         binding.recyclerviewFavorite.adapter = adapter
-        viewModel.favoriteWeatherList.observe(viewLifecycleOwner,
-            { adapter.notifyDataSetChanged() })
+        viewModel.favoriteWeatherList.observe(
+            viewLifecycleOwner
+        ) { adapter.notifyDataSetChanged() }
+        viewModel.weatherResponse.observe(viewLifecycleOwner) {
+            if (it != null) {
+                navigateToWeatherFragment(it.body()!!)
+            }
+        }
+        viewModel.failureMessage.observe(
+            viewLifecycleOwner
+        ) { if (it != null) toast(it) }
     }
+
 
     private fun setAutocompleteFragment() {
         val autocompleteFragment =
@@ -93,7 +112,7 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         )
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                navigateToWeatherFragment(place.latLng.latitude, place.latLng.longitude)
+                viewModel.getWeather(place.latLng.latitude, place.latLng.longitude)
             }
 
             override fun onError(status: Status) {
@@ -103,19 +122,21 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         })
     }
 
-    private fun navigateToWeatherFragment(lat : Double, lon : Double) {
+    private fun navigateToWeatherFragment(weatherApiResponse: WeatherApiResponse) {
+        runBlocking {
+            if (viewModel.favoriteWeatherList.value.isNullOrEmpty()) {
+                viewModel.loadFavoriteWeather().await()
+            }
+        }
         val locationName = WeatherApiResponseHelper.getLocationName(
-            lat,
-            lon,
+            weatherApiResponse.coord.lat,
+            weatherApiResponse.coord.lon,
             requireContext()
         )
+        weatherApiResponse.coord.name = locationName
         findNavController()
             .navigate(
-                MainFragmentDirections.actionMainFragmentToWeatherFragment(
-                    lat,
-                    lon,
-                    locationName
-                )
+                MainFragmentDirections.actionMainFragmentToWeatherFragment(weatherApiResponse)
             )
     }
 
@@ -128,28 +149,10 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
                     PRIORITY_HIGH_ACCURACY,
                     CancellationTokenSource().token
                 ).addOnSuccessListener { location ->
-
-                    Log.i("LOL", " ${location.latitude},${location.longitude}")
-                    val locationName = WeatherApiResponseHelper.getLocationName(
-                        location.latitude,
-                        location.longitude,
-                        requireContext()
-                    )
-                    findNavController()
-                        .navigate(
-                            MainFragmentDirections.actionMainFragmentToWeatherFragment(
-                                location.latitude,
-                                location.longitude,
-                                locationName
-                            )
-                        )
+                    viewModel.getWeather(location.latitude, location.longitude)
                 }
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Location cannot be obtained. Check that you have access to the Internet and that the location is turned on.",
-                    Toast.LENGTH_LONG
-                ).show()
+                toast("Location cannot be obtained. Check that the location is turned on.")
             }
         } else {
             requestPermissions()
@@ -199,6 +202,7 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        viewModel.clearWeatherResponse()
         _binding = null
     }
 }

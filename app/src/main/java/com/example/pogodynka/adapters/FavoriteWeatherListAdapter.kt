@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pogodynka.data.model.WeatherApiResponse
 import com.example.pogodynka.databinding.WeatherCardViewBinding
-import com.example.pogodynka.other.WeatherApiResponseHelper
+import com.example.pogodynka.util.WeatherApiResponseHelper
 import kotlin.math.roundToInt
 
 //TODO change adapter to Diff

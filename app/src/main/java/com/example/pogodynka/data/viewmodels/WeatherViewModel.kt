@@ -1,86 +1,110 @@
 package com.example.pogodynka.data.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.*
-import com.example.pogodynka.data.database.PogodynkaDao
+import com.example.pogodynka.data.database.PogodynkaDatabase
 import com.example.pogodynka.data.model.WeatherApiResponse
-import com.example.pogodynka.network.WeatherApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import com.example.pogodynka.network.WeatherApiService
+import com.example.pogodynka.other.NoInternetException
+import kotlinx.coroutines.*
 import retrofit2.Response
 
-class WeatherViewModel(private val pogodynkaDao: PogodynkaDao) : ViewModel() {
 
-    private val _weatherResponse : MutableLiveData<Response<WeatherApiResponse>> = MutableLiveData()
-    val weatherResponse : LiveData<Response<WeatherApiResponse>>
+class WeatherViewModel(
+    private val pogodynkaDb: PogodynkaDatabase,
+    private val weatherApi: WeatherApiService
+) : ViewModel() {
+
+    private var _failureMessage : MutableLiveData<String> = MutableLiveData()
+    val failureMessage : LiveData<String>
+        get() = _failureMessage
+
+    private var _weatherResponse: MutableLiveData<Response<WeatherApiResponse>> = MutableLiveData()
+    val weatherResponse: LiveData<Response<WeatherApiResponse>>
         get() = _weatherResponse
 
-    private val _favoriteWeatherList : MutableLiveData<MutableList<WeatherApiResponse>> = MutableLiveData(
-        mutableListOf())
-    val favoriteWeatherList : LiveData<MutableList<WeatherApiResponse>>
+    private val _favoriteWeatherList: MutableLiveData<MutableList<WeatherApiResponse>> =
+        MutableLiveData(
+            mutableListOf()
+        )
+    val favoriteWeatherList: LiveData<MutableList<WeatherApiResponse>>
         get() = _favoriteWeatherList
+
 
     init {
         loadFavoriteWeather()
     }
 
-    fun getWeather(lat : Double, lon : Double){
+    fun getWeather(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
-            _weatherResponse.postValue(WeatherApi.api.getWeather(lat,lon))
+            try {
+                _weatherResponse.postValue(weatherApi.getWeather(lat, lon))
+            } catch (e: NoInternetException) {
+                _failureMessage.postValue(e.message)
+            }
+
         }
     }
 
-    private fun loadFavoriteWeather() {
-        viewModelScope.launch(Dispatchers.IO) {
+
+    fun loadFavoriteWeather(): Deferred<Unit> {
+        return viewModelScope.async(Dispatchers.IO) {
             val favoriteCoordsList = viewModelScope.async(Dispatchers.IO) {
-                pogodynkaDao.getAllFavoriteCoords()
+                pogodynkaDb.pogodynkaDao().getAllFavoriteCoords()
             }
-            for(coord in favoriteCoordsList.await()){
-                viewModelScope.launch(Dispatchers.IO) {
-                    val weather = WeatherApi.api.getWeather(coord.lat, coord.lon).body()!!
-                    weather.coord.name=coord.name
-                    weather.favorite = true
-                    _favoriteWeatherList.addItem(weather)
+            try{
+                for (coord in favoriteCoordsList.await()) {
+                    viewModelScope.async(Dispatchers.IO) {
+
+                        val weather = weatherApi.getWeather(coord.lat, coord.lon)
+
+                        if (weather.isSuccessful) {
+                            weather.body()!!.coord.name = coord.name
+                            weather.body()!!.favorite = true
+                            _favoriteWeatherList.addItem(weather.body()!!)
+                        }
+                    }.await()
                 }
             }
+            catch (e:NoInternetException){
+                _failureMessage.postValue(e.message)
+            }
         }
     }
 
-    fun isWeatherFavorite(locName : String) : Int{
-        for(fav in favoriteWeatherList.value!!){
-            if(fav.coord.name==locName){
+    fun getFavoriteWeatherIndex(weather: WeatherApiResponse): Int {
+        for (fav in favoriteWeatherList.value!!) {
+            if (fav.coord.name == weather.coord.name) {
                 return favoriteWeatherList.value!!.indexOf(fav)
             }
         }
         return -1
     }
 
-    fun updateFavoriteWeather(index : Int, weather : WeatherApiResponse){
+    fun updateFavoriteWeather(index: Int, weather: WeatherApiResponse) {
         val oldValue = _favoriteWeatherList.value!!
         val favStatus = oldValue[index].favorite
         oldValue[index] = weather
         oldValue[index].favorite = favStatus
-        _weatherResponse.value!!.body()!!.favorite = favStatus
         _favoriteWeatherList.value = oldValue
     }
 
-    fun addFavoriteWeather(weather : WeatherApiResponse){
+    fun addFavoriteWeather(weather: WeatherApiResponse) {
         _favoriteWeatherList.addItem(weather)
         viewModelScope.launch(Dispatchers.IO) {
-            pogodynkaDao.insertFavoriteCoord(weather.coord)
+            pogodynkaDb.pogodynkaDao().insertFavoriteCoord(weather.coord)
         }
     }
 
-    fun removeFavoriteWeather(weather : WeatherApiResponse){
+    fun removeFavoriteWeather(weather: WeatherApiResponse) {
         _favoriteWeatherList.removeItem(weather)
         viewModelScope.launch(Dispatchers.IO) {
-            pogodynkaDao.deleteFavoriteCoord(weather.coord)
+            pogodynkaDb.pogodynkaDao().deleteFavoriteCoord(weather.coord)
         }
     }
 
-    fun clearWeatherResponse(){
+    fun clearWeatherResponse() {
         _weatherResponse.postValue(null)
+        _failureMessage.postValue(null)
     }
 
     private fun <T> MutableLiveData<MutableList<T>>.addItem(item: T) {
@@ -96,12 +120,15 @@ class WeatherViewModel(private val pogodynkaDao: PogodynkaDao) : ViewModel() {
     }
 }
 
-class WeatherViewModelFactory(private val pogodynkaDao: PogodynkaDao) :
+class WeatherViewModelFactory(
+    private val pogodynkaDB: PogodynkaDatabase,
+    private val weatherApi: WeatherApiService
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WeatherViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return WeatherViewModel(pogodynkaDao) as T
+            return WeatherViewModel(pogodynkaDB, weatherApi) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

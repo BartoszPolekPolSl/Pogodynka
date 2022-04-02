@@ -1,11 +1,10 @@
-package com.example.pogodynka.other
+package com.example.pogodynka.util
 
 
 import android.content.Context
 import android.location.Geocoder
 import android.util.Log
 import com.example.pogodynka.R
-import com.google.android.libraries.places.api.model.Place
 import java.time.Instant
 import java.util.*
 

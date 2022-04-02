@@ -11,27 +11,25 @@ import com.example.pogodynka.data.model.WeatherApiResponse
     version = 1,
     exportSchema = false
 )
-abstract class PogodynkaDatabase : RoomDatabase(){
-    abstract fun pogodynkaDao() : PogodynkaDao
+abstract class PogodynkaDatabase : RoomDatabase() {
+    abstract fun pogodynkaDao(): PogodynkaDao
 
     companion object {
         @Volatile
         private var INSTANCE: PogodynkaDatabase? = null
-
-        fun getDatabase(context: Context): PogodynkaDatabase {
-
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    PogodynkaDatabase::class.java,
-                    "pogodynka_database"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
-                INSTANCE = instance
-                instance
+        private val LOCK = Any()
+        operator fun invoke(context: Context) = INSTANCE ?: synchronized(LOCK) {
+            INSTANCE ?: buildDatabase(context).also {
+                INSTANCE = it
             }
         }
+
+        private fun buildDatabase(context: Context) =
+            Room.databaseBuilder(
+                context.applicationContext,
+                PogodynkaDatabase::class.java,
+                "pogodynka_database"
+            ).build()
 
     }
 }

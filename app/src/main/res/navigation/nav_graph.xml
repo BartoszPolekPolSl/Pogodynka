@@ -17,13 +17,7 @@
         android:name="com.example.pogodynka.fragments.WeatherFragment"
         android:label="WeatherFragment" >
         <argument
-            android:name="lat"
-            app:argType="java.lang.Double" />
-        <argument
-            android:name="lon"
-            app:argType="java.lang.Double" />
-        <argument
-            android:name="locName"
-            app:argType="string" />
+            android:name="weatherApiResponse"
+            app:argType="com.example.pogodynka.data.model.WeatherApiResponse" />
     </fragment>
 </navigation>
