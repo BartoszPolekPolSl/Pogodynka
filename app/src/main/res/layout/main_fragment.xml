@@ -12,22 +12,40 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"
+        android:backgroundTint="@color/primaryColor"
         app:srcCompat="@drawable/ic_baseline_gps_fixed_24"
-        app:tint="@color/primaryTextColor"
+        app:tint="@color/quantum_white_text"
         />
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/autocomplete_fragment"
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_view_autocomplete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-        />
+        app:strokeColor="@color/gray"
+        app:strokeWidth="1dp">
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            />
+    </com.google.android.material.card.MaterialCardView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_favorite"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/autocomplete_fragment"/>
+        app:layout_constraintTop_toBottomOf="@id/card_view_autocomplete" />
     <!--<androidx.appcompat.widget.SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -12,6 +12,8 @@ data class WeatherApiResponse(
     val main: Main,
     val sys: Sys,
     var coord: Coord,
+    val wind: Wind,
+    val clouds: Clouds,
     var name: String,
     val timezone: Int,
     var favorite : Boolean = false,
@@ -35,6 +37,16 @@ data class WeatherApiResponse(
         val temp: Double,
         val temp_max: Double,
         val temp_min: Double
+    ) : Parcelable
+
+    @Parcelize
+    data class Wind(
+        val speed: Double
+    ) : Parcelable
+
+    @Parcelize
+    data class Clouds(
+        val all: Int
     ) : Parcelable
 
     @Parcelize

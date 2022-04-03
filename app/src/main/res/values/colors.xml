@@ -9,5 +9,7 @@
     <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#000000</color>
     <color name="gray">#808080</color>
+    <color name="red">#ff1a1a</color>
     <color name="temp">#535358</color>
+    <color name="cardview_background">#e0faff</color>
 </resources>

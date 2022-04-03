@@ -38,7 +38,6 @@ class NetworkConnectionInterceptor(context: Context) : Interceptor {
                 sock.close()
                 true
             } catch (e: IOException) {
-                Log.i("LOL","LOLLL")
                 false
             }
         } else{

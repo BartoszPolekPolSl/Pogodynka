@@ -7,9 +7,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.ViewUtils
 import androidx.fragment.app.Fragment
@@ -19,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.pogodynka.adapters.FavoriteWeatherListAdapter
+import com.example.pogodynka.adapters.FavoriteWeatherListAdapterSenior
 import com.example.pogodynka.data.model.WeatherApiResponse
 import com.example.pogodynka.data.viewmodels.WeatherViewModel
 import com.example.pogodynka.data.viewmodels.WeatherViewModelFactory
@@ -74,6 +73,7 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAwar
                 val mapsApiKey = metaData.getString("com.google.android.geo.API_KEY")
                 Places.initialize(requireContext(), mapsApiKey!!)
             }
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -83,15 +83,8 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAwar
         binding.fabGpsLocation.setOnClickListener {
             getGPSWeather()
         }
-        val adapter = FavoriteWeatherListAdapter(
-            viewModel.favoriteWeatherList,
-            { navigateToWeatherFragment(it) },
-            { viewModel.removeFavoriteWeather(it) })
-        binding.recyclerviewFavorite.layoutManager = LinearLayoutManager(this.context)
-        binding.recyclerviewFavorite.adapter = adapter
-        viewModel.favoriteWeatherList.observe(
-            viewLifecycleOwner
-        ) { adapter.notifyDataSetChanged() }
+        setRecyclerAdapter()
+
         viewModel.weatherResponse.observe(viewLifecycleOwner) {
             if (it != null) {
                 navigateToWeatherFragment(it.body()!!)
@@ -100,6 +93,22 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAwar
         viewModel.failureMessage.observe(
             viewLifecycleOwner
         ) { if (it != null) toast(it) }
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if(viewModel.seniorMode){
+            toast("Senior mode OFF")
+            viewModel.seniorMode=false
+            setRecyclerAdapter();
+            true
+        } else{
+            toast("Senior mode ON")
+            viewModel.seniorMode=true
+
+            setRecyclerAdapter()
+            true
+        }
     }
 
 
@@ -116,10 +125,34 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAwar
             }
 
             override fun onError(status: Status) {
-                // TODO: Handle the error.
-                Log.i("LOL", "An error occurred: $status")
             }
         })
+    }
+
+    private fun setRecyclerAdapter(){
+        if(viewModel.seniorMode){
+            val adapter = FavoriteWeatherListAdapterSenior(
+                viewModel.favoriteWeatherList,
+                { navigateToWeatherFragment(it) },
+                { viewModel.removeFavoriteWeather(it) })
+            binding.recyclerviewFavorite.layoutManager = LinearLayoutManager(this.context)
+            binding.recyclerviewFavorite.adapter = adapter
+            viewModel.favoriteWeatherList.observe(
+                viewLifecycleOwner
+            ) { adapter.notifyDataSetChanged() }
+
+        }
+        else{
+            val adapter = FavoriteWeatherListAdapter(
+                viewModel.favoriteWeatherList,
+                { navigateToWeatherFragment(it) },
+                { viewModel.removeFavoriteWeather(it) })
+            binding.recyclerviewFavorite.layoutManager = LinearLayoutManager(this.context)
+            binding.recyclerviewFavorite.adapter = adapter
+            viewModel.favoriteWeatherList.observe(
+                viewLifecycleOwner
+            ) { adapter.notifyDataSetChanged() }
+        }
     }
 
     private fun navigateToWeatherFragment(weatherApiResponse: WeatherApiResponse) {
@@ -134,10 +167,18 @@ class MainFragment : Fragment(), EasyPermissions.PermissionCallbacks, KodeinAwar
             requireContext()
         )
         weatherApiResponse.coord.name = locationName
-        findNavController()
-            .navigate(
-                MainFragmentDirections.actionMainFragmentToWeatherFragment(weatherApiResponse)
-            )
+        if(viewModel.seniorMode){
+            findNavController()
+                .navigate(
+                    MainFragmentDirections.actionMainFragmentToWeatherFragmentSenior(weatherApiResponse)
+                )
+        }
+        else{
+            findNavController()
+                .navigate(
+                    MainFragmentDirections.actionMainFragmentToWeatherFragment(weatherApiResponse)
+                )
+        }
     }
 
     @SuppressLint("MissingPermission")

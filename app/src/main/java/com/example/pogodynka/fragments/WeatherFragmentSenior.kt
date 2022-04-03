@@ -11,6 +11,7 @@ import com.example.pogodynka.data.model.WeatherApiResponse
 import com.example.pogodynka.data.viewmodels.WeatherViewModel
 import com.example.pogodynka.data.viewmodels.WeatherViewModelFactory
 import com.example.pogodynka.databinding.WeatherFragmentBinding
+import com.example.pogodynka.databinding.WeatherFragmentSBinding
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.closestKodein
 import org.kodein.di.generic.instance
@@ -18,14 +19,14 @@ import org.kodein.di.generic.instance
 
 import kotlin.math.roundToInt
 
-class WeatherFragment : Fragment(), KodeinAware {
+class WeatherFragmentSenior : Fragment(), KodeinAware {
 
     override val kodein by closestKodein()
     private val factory: WeatherViewModelFactory by instance()
     private val navigationArgs: WeatherFragmentArgs by navArgs()
     private val viewModel: WeatherViewModel by activityViewModels { factory }
 
-    private var _binding: WeatherFragmentBinding? = null
+    private var _binding: WeatherFragmentSBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -33,7 +34,7 @@ class WeatherFragment : Fragment(), KodeinAware {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = WeatherFragmentBinding.inflate(inflater, container, false)
+        _binding = WeatherFragmentSBinding.inflate(inflater, container, false)
         return binding.root
     }
 

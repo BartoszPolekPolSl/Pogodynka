@@ -6,4 +6,6 @@
     <string name="humidity">Humidity</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
+    <string name="wind">Wind</string>
+    <string name="clouds">Clouds</string>
 </resources>

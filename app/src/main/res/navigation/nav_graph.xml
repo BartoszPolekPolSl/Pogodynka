@@ -11,11 +11,22 @@
         <action
             android:id="@+id/action_mainFragment_to_weatherFragment"
             app:destination="@id/weatherFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_weatherFragmentSenior"
+            app:destination="@id/weatherFragmentSenior" />
     </fragment>
     <fragment
         android:id="@+id/weatherFragment"
         android:name="com.example.pogodynka.fragments.WeatherFragment"
         android:label="WeatherFragment" >
+        <argument
+            android:name="weatherApiResponse"
+            app:argType="com.example.pogodynka.data.model.WeatherApiResponse" />
+    </fragment>
+    <fragment
+        android:id="@+id/weatherFragmentSenior"
+        android:name="com.example.pogodynka.fragments.WeatherFragmentSenior"
+        android:label="WeatherFragmentSenior" >
         <argument
             android:name="weatherApiResponse"
             app:argType="com.example.pogodynka.data.model.WeatherApiResponse" />

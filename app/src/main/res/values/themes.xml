@@ -17,12 +17,23 @@
     <style name="TextViewWeatherConditions" parent="Widget.AppCompat.TextView">
         <item name="android:textColor">@color/primaryTextColor</item>
         <item name="android:textSize">20sp</item>
-        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
     </style>
 
-    <style name="TextViewWeatherConditionsValues" >
-        <item name="android:textSize">20sp</item>
-        <item name="android:layout_marginTop">15dp</item>
+    <style name="TextViewWeatherConditionsS" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/primaryTextColor</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+    </style>
+
+    <style name="TextViewWeatherConditionsValuesSenior" parent="Widget.AppCompat.TextView">
+        <item name="android:textSize">35sp</item>
+
+
 
     </style>
 

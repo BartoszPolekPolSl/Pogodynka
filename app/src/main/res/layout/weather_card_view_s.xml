@@ -32,7 +32,7 @@
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="5dp"
                 android:textColor="@color/primaryTextColor"
-                android:textSize="21sp"
+                android:textSize="35sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/button_fav"
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:textColor="@color/gray"
-                android:textSize="14sp"
+                android:textSize="31sp"
                 app:layout_constraintTop_toBottomOf="@id/txt_view_location"
                 tools:text="Poniedziałek, 11:00" />
 
@@ -63,9 +63,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                android:textColor="@color/temp"
-                android:textSize="60sp"
-                app:layout_constraintBottom_toBottomOf="@id/image_view_weather"
+                android:textColor="@color/red"
+                android:textSize="80sp"
+                app:layout_constraintTop_toBottomOf="@id/text_clock"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="27" />
 
@@ -75,8 +75,8 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="5dp"
                 android:text="\u2103"
-                android:textColor="@color/temp"
-                android:textSize="50sp"
+                android:textColor="@color/red"
+                android:textSize="60sp"
                 app:layout_constraintStart_toEndOf="@id/txt_view_temp"
                 app:layout_constraintTop_toTopOf="@id/txt_view_temp" />
 
@@ -94,11 +94,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:textSize="20sp"
+                android:textSize="35sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txt_view_temp"
-                tools:text="Clear sky" />
+                tools:text="Clear sky"
+                android:textFontWeight="700"/>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

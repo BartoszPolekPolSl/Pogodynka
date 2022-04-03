@@ -14,6 +14,8 @@ class WeatherViewModel(
     private val weatherApi: WeatherApiService
 ) : ViewModel() {
 
+    var seniorMode : Boolean = false
+
     private var _failureMessage : MutableLiveData<String> = MutableLiveData()
     val failureMessage : LiveData<String>
         get() = _failureMessage

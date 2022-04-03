@@ -5,27 +5,12 @@ import android.content.Context
 import android.location.Geocoder
 import android.util.Log
 import com.example.pogodynka.R
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 
 object WeatherApiResponseHelper {
 
-//    fun getLocationName(place: Place): String {
-//        var city: String = ""
-//        var country: String = ""
-//        for (i in place.addressComponents.asList()) {
-//            var addressObj = i
-//            for (j in addressObj.types) {
-//                if (j == "locality") {
-//                    city = addressObj.name
-//                }
-//                if (j == "country") {
-//                    country = addressObj.name
-//                }
-//            }
-//        }
-//        return "${city}, $country"
-//    }
 
     fun getLocationName(lat : Double, lon : Double, context : Context): String {
         val geoCoder = Geocoder(context)
@@ -52,6 +37,14 @@ object WeatherApiResponseHelper {
                 TimeZone.getTimeZone("GMT${hours}")
             }
         }
+    }
+
+    fun getDate(timezone: Int): String {
+        val c = Calendar.getInstance()
+        val date = c.time
+        val df = SimpleDateFormat("dd.MM.yyyy")
+        df.timeZone = convertToTimeZone(timezone)
+        return df.format(date)
     }
 
     fun getWeatherIcon(icon: String): Int {
